@@ -2,5 +2,14 @@
 name = "mathio"
 version = "0.1.0"
 edition = "2021"
+license = "MIT OR Apache-2.0"
+authors = ["Dominik Kaspar <dominik0kaspar@gmail.com>"]
+repository = "https://github.com/bytestring-net/mathio"
+keywords = ["mathio", "math", "data-type", "struct"]
+categories = ["math", "data-type"]
+description = "opinionated small scoped library for math used in other projects"
+readme = "README.md"
 
 [dependencies]
+deku = {version = "0.16.0", default_features = false, features = ["std"]}
+serde = {version = "1.0.181", default_features = false, features = ["derive"]}
