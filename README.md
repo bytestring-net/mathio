@@ -9,10 +9,16 @@ A ***lightweight***, ***simple*** and ***straight-forward*** opinionated library
 Current features are:
 
 * Fractions
+* Tweening
+* Periods
 
 
 ### === Examples ===
-```rust
+
+**Fractions**
+
+Great for expressing lossless floats
+``` rust
 use mathio::Fraction;
 
 let frac_1 = Fraction::new(2, 3);
@@ -23,6 +29,17 @@ assert_eq!(frac_1 - frac_2, Fraction::new(1, 6));
 assert_eq!(frac_1 * frac_2, Fraction::new(1, 3));
 assert_eq!(frac_1 / frac_2, Fraction::new(4, 3));
 assert_eq!(frac_1 >= frac_2, true);
+```
+
+**Periods**
+
+Good for clamping repeating values (angles, sin/cosine, etc.)
+``` rust
+let period = 360.0;
+assert_eq!(315.0, periodical(period, -45.0));
+assert_eq!(45.0, periodical(period, 45.0));
+assert_eq!(0.0, periodical(period, 360.0));
+assert_eq!(90.0, periodical(period, 450.0));
 ```
 
 ### === Licensing ===
