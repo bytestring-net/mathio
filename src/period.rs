@@ -76,3 +76,27 @@ pub fn periodical_difference_long(period: f32, x1: f32, x2: f32) -> f32 {
         difference
     }
 }
+
+/// # Periodical Tween Short
+/// A function to tween between two periodical values
+/// Uses the shortest path.
+///
+/// The most common example would be tweening between 2 angles in degrees.
+pub fn periodical_tween_short(period: f32, x1: f32, x2: f32, slider: f32) -> f32 {
+    let start = periodical(period, x1);
+    periodical(
+        period,
+        start + periodical_difference_short(period, x1, x2) * slider,
+    )
+}
+
+/// # Periodical Tween Long
+/// A function to tween between two periodical values
+/// Uses the longest path.
+///
+/// The most common example would be tweening between 2 angles in degrees.
+pub fn periodical_tween_long(period: f32, x1: f32, x2: f32, slider: f32) -> f32 {
+    let start = periodical(period, x1);
+    let difference = periodical_difference_long(period, x1, x2);
+    periodical(period, start + difference * slider)
+}
