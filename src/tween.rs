@@ -29,7 +29,7 @@ impl Tween for f32 {
 #[cfg(feature = "bevy")]
 impl Tween for Vec2 {
     fn tween(&mut self, other: &Self, slider: f32) {
-        self.x.tween(other.x, slider);
-        self.y.tween(other.y, slider);
+        self.x.tween(&other.x, slider);
+        self.y.tween(&other.y, slider);
     }
 }
