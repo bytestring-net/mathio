@@ -1,11 +1,17 @@
-//documentation
 #![doc = include_str!("../README.md")]
-
 
 mod fractions;
 mod period;
-mod tween;
 
 pub use crate::fractions::*;
 pub use crate::period::*;
-pub use crate::tween::*;
+
+
+#[test]
+fn test() {
+    let a = Frac32::ONE * Frac32::new(1, 2);
+    assert_eq!(a, Frac32::new(1, 2));
+
+    let a = Frac32::new(1, 6) + Frac32::new(1, 4);
+    assert_eq!(a, Frac32::new(5, 12));
+}

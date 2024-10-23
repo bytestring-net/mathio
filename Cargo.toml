@@ -1,23 +1,24 @@
+#====================#
+#=== PACKAGE INFO ===#
+
 [package]
-name = "mathio"
-version = "0.2.5"
-edition = "2021"
-license = "MIT OR Apache-2.0"
-authors = ["Dominik Kaspar <dominik0kaspar@gmail.com>"]
-repository = "https://github.com/bytestring-net/mathio"
-keywords = ["mathio", "math", "tweening", "periods", "fractions"]
-categories = ["data-structures", "mathematics"]
-description = "A lightweight, simple and straight-forward opinionated library for math used in other projects"
-readme = "README.md"
+  name = "mathio"
+  version = "0.2.5"
+  edition = "2021"
+  readme  = "README.md"
+  license = "MIT OR Apache-2.0"
+  authors = ["IDEDARY"]
+
+  repository  = "https://github.com/bytestring-net/mathio"
+  keywords    = ["mathio", "math", "tweening", "periodic", "fractions"]
+  categories  = ["data-structures", "mathematics"]
+  description = "A lightweight, simple and straight-forward opinionated library for math used in other projects"
+
+#===============================#
+#=== DEPENDENCIES & FEATURES ===#
 
 [dependencies]
-deku = {version = "^0.16", default_features = false, features = ["std"], optional = true}
-serde = {version = "^1", default_features = false, features = ["derive"], optional = true}
-speedy = {version = "^0.8", default_features = false, features = ["speedy-derive"], optional = true}
-bevy = {version = "^0", default_features = false, optional = true }
+  serde = { version = "*", default_features = false, features = ["derive"], optional = true }
 
 [features]
-serde = ["dep:serde"]
-deku = ["dep:deku"]
-speedy = ["dep:speedy"]
-bevy = ["dep:bevy"]
+  serde = ["dep:serde"]

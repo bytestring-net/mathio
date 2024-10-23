@@ -1,154 +1,136 @@
 use std::{ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign}, fmt::{Display, self}};
 use core::cmp::{PartialEq, PartialOrd, Ordering, Eq};
-#[cfg(feature = "deku")]
-use deku::{DekuRead, DekuWrite, DekuContainerWrite, DekuUpdate};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-#[cfg(feature = "speedy")]
-use speedy::{Readable, Writable};
 
-
-const PRIMES: [i32; 100] = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 409, 419, 421, 431, 433, 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 499, 503, 509, 521, 523, 541];
-
-/// # Fraction
-/// A lossless data representation of a float. Very simple, lightweight and straight implementation.
-/// 
-/// You can do all normal operations like adding and subtracting, multiplication and division.
-/// You can compare them too.
-/// 
-/// # Examples:
-/// ```
-/// use mathio::Fraction;
-/// 
-/// let frac_1 = Fraction::new(2, 3);
-/// let frac_2 = Fraction::new(3, 6);
-/// 
-/// assert_eq!(frac_1 + frac_2, Fraction::new(7, 6));
-/// assert_eq!(frac_1 - frac_2, Fraction::new(1, 6));
-/// assert_eq!(frac_1 * frac_2, Fraction::new(1, 3));
-/// assert_eq!(frac_1 / frac_2, Fraction::new(4, 3));
-/// assert_eq!(frac_1 >= frac_2, true);
-/// ```
+/// Fraction i32 type
+#[derive(Clone, Copy, Debug)]
+#[derive(Eq)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
-#[cfg_attr(feature = "deku", derive(DekuRead, DekuWrite))]
-#[cfg_attr(feature = "deku", derive(Writable, Readable))]
-#[derive(Debug, Default, Eq, Copy, Clone)]
-pub struct Fraction {
+pub struct Frac32 {
     pub numerator: i32,
     pub denominator: i32,
 }
-impl Fraction {
-    /// Creates new fraction.
-    /// ```
-    /// use mathio::Fraction;
-    /// 
-    /// let frac = Fraction::new(1, 2); // 1/2 or one_half
-    /// ```
-    pub fn new (num: i32, den: i32) -> Fraction {
-        Fraction { numerator: num, denominator: den }
+impl Frac32 {
+    pub const ONE: Self = Self::new(1,1);
+    /// Creates new fraction
+    pub const fn new(num: i32, den: i32) -> Frac32 {
+        Frac32 { numerator: num, denominator: den }
     }
-    /// Will evaluate the fraction and return a f32 approximation.
-    pub fn eval (&self) -> f32 {
-        self.numerator as f32/self.denominator as f32
+    /// Will evaluate the fraction and return a f32 approximation
+    pub fn eval(&self) -> f32 {
+        self.numerator as f32 / self.denominator as f32
     }
-    /// Will check and simplify the fraction. Checks up to the first 100 prime numbers.
-    /// If your fraction is a multiplication of a higher prime numbers, simplification will not work.
-    pub fn simplify (mut self) -> Fraction {
-        let mut i = 0;
-        let n = PRIMES.len();
-        while i < n {
-            if self.denominator < PRIMES[i] {break;}
-            if self.numerator % PRIMES[i] == 0 && self.denominator % PRIMES[i] == 0 {
-                self.numerator /= PRIMES[i];
-                self.denominator /= PRIMES[i];
-                i = 0;
-            } else {
-                i += 1;
-            }
-        }
-        self
+
+    pub fn elem(self) -> Self {
+        let common = highest_divisor(self.numerator, self.denominator);
+        Self::new(self.numerator/common, self.denominator/common)
     }
-    
-    fn sum (num1: i32, den1: i32, num2: i32, den2: i32) -> Fraction {
-        Fraction::new(num1*den2 + num2*den1, den1 * den2).simplify()
-    }
-    fn sub (num1: i32, den1: i32, num2: i32, den2: i32) -> Fraction {
-        Fraction::new(num1*den2 - num2*den1, den1 * den2).simplify()
-    }
-    fn mul (num1: i32, den1: i32, num2: i32, den2: i32) -> Fraction {
-        Fraction::new(num1*num2, den1*den2).simplify()
-    }
-    fn div (num1: i32, den1: i32, num2: i32, den2: i32) -> Fraction {
-        Fraction::mul(num1, den1, den2, num2)
+}
+impl Display for Frac32 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "({}/{})", self.numerator, self.denominator)
     }
 }
 
-impl Add for Fraction {
+impl Add for Frac32 {
     type Output = Self;
     fn add(self, other: Self) -> Self {
-        Fraction::sum(self.numerator, self.denominator, other.numerator, other.denominator)
+        Frac32::new(
+            self.numerator*other.denominator + other.numerator*self.denominator,
+            self.denominator * other.denominator,
+        ).elem()
     }
 }
-impl AddAssign for Fraction {
+impl AddAssign for Frac32 {
     fn add_assign(&mut self, other: Self) {
-        *self = Fraction::sum(self.numerator, self.denominator, other.numerator, other.denominator);
+        *self = *self + other;
     }
 }
-impl Sub for Fraction {
+impl Sub for Frac32 {
     type Output = Self;
     fn sub(self, other: Self) -> Self {
-        Fraction::sub(self.numerator, self.denominator, other.numerator, other.denominator)
+        Frac32::new(
+            self.numerator*other.denominator - other.numerator*self.denominator,
+            self.denominator * other.denominator,
+        ).elem()
     }
 }
-impl SubAssign for Fraction {
+impl SubAssign for Frac32 {
     fn sub_assign(&mut self, other: Self) {
-        *self = Fraction::sub(self.numerator, self.denominator, other.numerator, other.denominator);
+        *self = *self - other;
     }
 }
-impl Mul for Fraction {
+impl Mul for Frac32 {
     type Output = Self;
     fn mul(self, other: Self) -> Self {
-        Fraction::mul(self.numerator, self.denominator, other.numerator, other.denominator)
+        Frac32::new(
+            self.numerator * other.numerator,
+            self.denominator * other.denominator,
+        ).elem()
     }
 }
-impl MulAssign for Fraction {
+impl MulAssign for Frac32 {
     fn mul_assign(&mut self, other: Self) {
-        *self = Fraction::mul(self.numerator, self.denominator, other.numerator, other.denominator);
+        *self = *self * other;
     }
 }
-impl Div for Fraction {
+impl Div for Frac32 {
     type Output = Self;
     fn div(self, other: Self) -> Self {
-        Fraction::div(self.numerator, self.denominator, other.numerator, other.denominator)
+        Frac32::new(
+            self.numerator * other.denominator,
+            self.denominator * other.numerator,
+        ).elem()
     }
 }
-impl DivAssign for Fraction {
+impl DivAssign for Frac32 {
     fn div_assign(&mut self, other: Self) {
-        *self = Fraction::div(self.numerator, self.denominator, other.numerator, other.denominator);
+        *self = *self / other;
     }
 }
 
-impl PartialEq for Fraction {
+impl PartialEq for Frac32 {
     fn eq(&self, other: &Self) -> bool {
         let a = self.numerator*other.denominator;
         let b = other.numerator*self.denominator;
         a == b
     }
 }
-impl PartialOrd for Fraction {
+impl PartialOrd for Frac32 {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
-impl Ord for Fraction {
+impl Ord for Frac32 {
     fn cmp(&self, other: &Self) -> Ordering {
         let a = self.numerator*other.denominator;
         let b = other.numerator*self.denominator;
         a.cmp(&b)
     }
 }
-impl Display for Fraction {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "({}/{})", self.numerator, self.denominator)
+
+/// Find the highest divisor
+pub fn highest_divisor(a: i32, b: i32) -> i32 {
+    let mut divisor = 1;
+    let mut max = a.max(b);
+    let mut min = a.min(b);
+
+    let mut i = 1;
+    while i <= min {
+        if min%i == 0 && max%i == 0 && i != 1 {
+            divisor *= i;
+            min /= i;
+            max /= i;
+        } else {
+            i += 1;
+        }
     }
+
+    divisor
+}
+
+/// Find the lowest multiple
+pub fn lowest_multiple(a: i32, b: i32) -> i32 {
+    a*b / highest_divisor(a, b)
 }
